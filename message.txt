@@ -1,0 +1,12 @@
+
+  Good morning __NAME__:
+
+  Quick message to test generation and sending of custom QRs to email [__EMAIL__], user [__NAME__ __SURNAME__].
+
+  We have prepared QRs in different formats and for normal and shortened URLs, linking to  __URL__.
+
+  Best,
+
+
+  Javi
+
