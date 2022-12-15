@@ -6,7 +6,8 @@ This quick and dirty script processes a simple ; delimited csv files to:
 - Shorten the URL using tinyurl
 - Generate a QR for the url and shortened url (in png format)
 - Add some text info to the generated pngs
-- Convert pdf versiond of the png files
+- Convert the png files to their pdf versions
+- Customize email body text
 - Send email with attached png's and pdf's
 
 
