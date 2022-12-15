@@ -7,8 +7,13 @@ QR_TOOL=qrencode
 QR_OPTIONS="-s 15 -m 20"
 CONVERT_TOOL=convert
 
+# Fill in this cc/bcc email in case you want to cc the sent messages to anybody
+CC_EMAIL=""
+BCC_EMAIL=""
+
 while read -r line
 do
+    echo "Processing [$line]..."
     # Parse input file
     NAME=`echo $line | cut -f 1 -d ";" | cut -f 2 -d "," | xargs`
     SURNAME=`echo $line | cut -f 1 -d ";" | cut -f 1 -d "," | xargs `
@@ -18,7 +23,7 @@ do
     # Shorten URL
     URL_SHORT=`curl https://tinyurl.com/api-create.php\?url\=$URL`
 
-    echo "Shortened URL, from [$URL] to [$URL_SHORT]"
+    echo "   Shortened URL, from [$URL] to [$URL_SHORT]"
 
     # Define filename related variables
     BASENAME=`echo $SURNAME$NAME|tr -d " ,"`
@@ -44,13 +49,27 @@ do
     $CONVERT_TOOL $QRTX_FILENAME $PDF_QRTX_FILENAME
     $CONVERT_TOOL short-$QRTX_FILENAME short-$PDF_QRTX_FILENAME
 
-    echo "Sending email to [$NAME $SURNAME] [EMAIL=$EMAIL] [URL=$URL] attaching [$QR_FILENAME]..."
+    echo "   Sending email to [$NAME $SURNAME] [EMAIL=$EMAIL] [URL=$URL] attaching [$QR_FILENAME]..."
 
     # overwrite here cc and/or dest_email if required
     cc=$CC_EMAIL
+    bcc=$BCC_EMAIL
     to=$EMAIL
 
+    # Process cc/bcc specifications for versatility
+    CC_OPTIONS=""
+    BCC_OPTIONS=""
+    if [ ! "$cc" == "" ]
+    then
+        CC_OPTIONS="-c $cc"
+    fi
+    if [ ! "$bcc" == "" ]
+    then
+        BCC_OPTIONS="-b $bcc"
+    fi
+
+    # Tune standard message and send it
     cat $FILE|sed "s#__NAME__#$NAME#g"|sed "s#__SURNAME__#$SURNAME#g"|sed "s#__EMAIL__#$EMAIL#g"|sed "s#__URL__#$URL#g"|sed "s#__EMAIL__#$EMAIL#g" > $TX_FILENAME
-    mutt -s "Test messages with QR's & more" -c $cc $to -a "$QRTX_FILENAME" -a "$PDF_QRTX_FILENAME" -a "short-$QRTX_FILENAME" -a "short-$PDF_QRTX_FILENAME" < $TX_FILENAME
+    mutt -s "Test messages with QR's & more" $CC_OPTIONS $BCC_OPTIONS $to -a "$QRTX_FILENAME" -a "$PDF_QRTX_FILENAME" -a "short-$QRTX_FILENAME" -a "short-$PDF_QRTX_FILENAME" < $TX_FILENAME
 
 done < "$DATA"
